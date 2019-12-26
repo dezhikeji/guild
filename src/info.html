@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="renderer" content="webkit"/>
+    <title>主播结算系统</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-table.css" rel="stylesheet">
+    <link href="css/bootstrap-dialog.min.css" rel="stylesheet" type="text/css" />
+    <script src="js/jquery-1.12.4.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/bootstrap-table.js"></script>
+    <script src="js/bootstrap-table-zh-CN.js"></script>
+    <script src="js/date.format.js"></script>
+    <script src="js/bootstrap-dialog.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <h3 id="info" class="text-center">欢迎光临，数据加载中</h3>
+    <div class="form-group" >
+            <label for="date" class="col-sm-2 control-label">日期：</label>
+            <div class="col-sm-10">
+                <input type="date" id="date" name="date" class="form-control" >
+                <div class="help-block with-errors"></div>
+            </div>
+        </div>
+        <div class="form-group" >
+            <label class="col-sm-4 control-label"></label>
+            <div class="col-sm-4">
+                <button type="button" class="btn btn-success" onclick="reloadData()" >提交</button>
+            </div>
+            <div class="col-sm-4">
+                <button type="button" class="btn btn-success" onclick="bindWx()" >绑定微信</button>
+            </div>
+        </div>
+    <div>
+        <table id="users"></table>
+    </div>
+</div>
+<script>
+    function getData(){
+                $("#info").text("请稍等，正在统计数据");
+                var date=$("#date").val();
+                                $.get('/api/user/hostessOrders?date='+date,function(data){
+                                    $('#users').bootstrapTable({
+                                        columns: [{
+                                            field: 'name',
+                                            title: '主播'
+                                        }, {
+                                            field: 'time',
+                                            title: '开播时间(分钟)'
+                                        }, {
+                                            field: 'voice',
+                                            title: '语音视频收入'
+                                        }, {
+                                            field: 'income',
+                                            title: '直播收入'
+                                        }],
+                                        data: data.data.list
+                                    });
+                                    $("#info").text("数据统计完毕,"+dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"));
+                                }).fail(function(data){
+                                if(data.status==401){
+                                    window.location.href="index.html";
+                                }else {
+                                    alert(data.responseJSON.msg);
+                                }
+                            });
+    }
+    function reloadData(){
+                $("#info").text("请稍等，正在统计数据");
+                var date=$("#date").val();
+                                $.get('/api/user/hostessOrders?date='+date,function(data){
+                                    $('#users').bootstrapTable("load",data.data.list);
+                                    $("#info").text("数据统计完毕,"+dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"));
+                                }).fail(function(data){
+                                if(data.status==401){
+                                    window.location.href="index.html";
+                                }else {
+                                    alert(data.responseJSON.msg);
+                                }
+                            });
+    }
+    function bindWx(){
+        BootstrapDialog.show({
+            message: '请使用本公会账号，在客户端使用需要收钱的微信账号充值任意金额!时效30分钟，超过30分钟请重新充值。绑定成功后会转入一笔资金，请进入微信核对是否成功',
+            onhidden: function(dialogRef){
+                $.post('/api/user/bindWx',{t:'1234'},function(data){
+                                alert(data.msg);
+                         }).fail(function(data){
+                            if(data.status==401){
+                                window.location.href="index.html";
+                            }else {
+                                alert(data.responseJSON.msg);
+                            }
+                 });
+            }
+        });
+    }
+    $(function() {
+                document.getElementById('date').valueAsDate = new Date();
+                getData();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="renderer" content="webkit"/>
+    <title>登陆</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-login.css" rel="stylesheet">
+    <script src="js/jquery-1.12.4.js"></script>
+    <script src="js/bootstrap.js"></script>
+</head>
+<body>
+<div>
+    <div id="login"
+         data-title="主播结算系统">
+    </div>
+</div>
+<script src="js/bootstrap-login.js"></script>
+<script>
+    $(function() {
+        $('#login').bootstrapLogin({
+            onSubmit: function(username, password) {
+            $.post('/api/user/loginWithPwd',{phone:username,password:password,uuid:'12345678'},function(data){
+                window.location.href="info.html";
+                return data.code==200;
+            }).fail(function(data){
+                alert(data.responseJSON.msg);
+                return false;
+            });
+        }
+    });
+    });
+</script>
+</body>
+</html>
